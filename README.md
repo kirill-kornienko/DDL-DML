@@ -49,6 +49,15 @@ CREATE USER 'sys_temp'@'localhost' IDENTIFIED BY '1234567';
 ```
 ![create_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/create%20user.png)
 
+1.3. Выполните запрос на получение списка пользователей в базе данных. (скриншот)
+
+```
+SELECT user FROM mysql.user;
+
+```
+
+![select_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/select%20user.png)
+
 1.4. Дайте все права для пользователя sys_temp.
 
 ```
