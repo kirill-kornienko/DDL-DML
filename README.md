@@ -19,47 +19,125 @@
 ```
 ALTER USER 'sys_test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
 ```
+1.6. По ссылке https://downloads.mysql.com/docs/sakila-db.zip скачайте дамп базы данных.
 
+1.7. Восстановите дамп в базу данных.
 
-*Приведите скриншот команды 'curl -X GET 'localhost:9200/_cluster/health?pretty', сделанной на сервере с установленным Elasticsearch. Где будет виден нестандартный cluster_name.*.
+1.8. При работе в IDE сформируйте ER-диаграмму получившейся базы данных. При работе в командной строке используйте команду для получения всех таблиц базы данных. (скриншот)
 
-### *Ответ:*
-
-![elasticsearch](https://github.com/kirill-kornienko/ELK/blob/main/elasticsearch.png)
-
-
-### Задание 2. Kibana
-
-Установите и запустите Kibana.
-
-*Приведите скриншот интерфейса Kibana на странице http://<ip вашего сервера>:5601/app/dev_tools#/console, где будет выполнен запрос GET /_cluster/health?pretty.*.
-
+*Результатом работы должны быть скриншоты обозначенных заданий, а также простыня со всеми запросами.
 
 ### *Ответ:*
-![kibana](https://github.com/kirill-kornienko/ELK/blob/main/kibana.png)
 
+1.1. Поднимите чистый инстанс MySQL версии 8.0+. Можно использовать локальный сервер или контейнер Docker.
 
-### Задание 3. Logstash
+```
+wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.28-1_all.deb
+sudo dpkg -i mysql-apt-config_0.8.28-1_all.deb
+sudo apt update
+sudo apt install mysql-server
+sudo systemctl status mysql
+sudo systemctl enable mysql
+mysql -u root -p
+```
+![status_mysql](https://github.com/kirill-kornienko/DDL-DML/blob/main/status%20mysql.png)
+![mysql](https://github.com/kirill-kornienko/DDL-DML/blob/main/mysql.png)
 
-Установите и запустите Logstash и Nginx. С помощью Logstash отправьте access-лог Nginx в Elasticsearch.
+1.2. Создайте учётную запись sys_temp.
+```
+CREATE USER 'sys_temp'@'localhost' IDENTIFIED BY '1234567';
+```
+![create_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/create%20user.png)
 
+1.4. Дайте все права для пользователя sys_temp.
 
-*Приведите скриншот интерфейса Kibana, на котором видны логи Nginx.*.
+```
+GRANT ALL PRIVILEGES ON *.* TO 'sys_temp'@'localhost' WITH GRANT OPTION;
+```
+![all_priveleges](https://github.com/kirill-kornienko/DDL-DML/blob/main/all_priveleges.png)
 
+1.5. Выполните запрос на получение списка прав для пользователя sys_temp. (скриншот)
 
-### *Ответ*:
-![logstash](https://github.com/kirill-kornienko/ELK/blob/main/logstash.png)
+```
+SELECT * FROM information_schema.user_privileges WHERE GRANTEE="'sys_temp'@'localhost'";
+```
+![systemp1](https://github.com/kirill-kornienko/DDL-DML/blob/main/sys_temp1.png)
+![systemp2](https://github.com/kirill-kornienko/DDL-DML/blob/main/sys_temp2.png)
 
+1.6. Переподключитесь к базе данных от имени sys_temp.
 
-### Задание 4. Filebeat.
+```bash
+SYSTEM mysql -u sys_temp -p
+SELECT user();
+```
+![select_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/select%20user.png)
 
-Установите и запустите Filebeat. Переключите поставку логов Nginx с Logstash на Filebeat.
+Для смены типа аутентификации с sha2 используйте запрос:
 
-*Приведите скриншот интерфейса Kibana, на котором видны логи Nginx, которые были отправлены через Filebeat.*.
+```
+ALTER USER 'sys_test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+```
+1.7. По ссылке [https://downloads.mysql.com/docs/sakila-db.zip](https://downloads.mysql.com/docs/sakila-db.zip) скачайте дамп базы данных.
 
-### *Ответ*:
+```
+wget https://downloads.mysql.com/docs/sakila-db.zip
+unzip sakila-db.zip
+```
+![sakila](https://github.com/kirill-kornienko/DDL-DML/blob/main/sakila.png)
 
-![filebeat](https://github.com/kirill-kornienko/ELK/blob/main/filebeat.png)
+1.8. Восстановите дамп в базу данных.
+
+```
+source /home/tverdyakov/sakila-db/sakila-schema.sql
+source /home/tverdyakov/sakila-db/sakila-data.sql
+SHOW DATABASES;
+```
+![sakila_schema](https://github.com/kirill-kornienko/DDL-DML/blob/main/sakila_schema1.png)
+![sakila_data](https://github.com/kirill-kornienko/DDL-DML/blob/main/sakila_data.png)
+![show_databases](https://github.com/kirill-kornienko/DDL-DML/blob/main/show_database.png)
+
+1.9. При работе в IDE сформируйте ER-диаграмму получившейся базы данных. При работе в командной строке используйте команду для получения всех таблиц базы данных. (скриншот)
+
+```
+SHOW TABLES;
+```
+![show_tables](https://github.com/kirill-kornienko/DDL-DML/blob/main/show_tables.png)
+
+### Задание 2. 
+
+Составьте таблицу, используя любой текстовый редактор или Excel, в которой должно быть два столбца: в первом должны быть названия таблиц восстановленной базы, во втором названия первичных ключей этих таблиц. Пример: (скриншот/текст)
+
+```
+Название таблицы | Название первичного ключа
+customer         | customer_id
+```
+### *Ответ:*
+```
++---------------+--------------+
+| TABLE_NAME    | COLUMN_NAME  |
++---------------+--------------+
+| actor         | actor_id     |
+| address       | address_id   |
+| category      | category_id  |
+| city          | city_id      |
+| country       | country_id   |
+| customer      | customer_id  |
+| film          | film_id      |
+| film_actor    | actor_id     |
+| film_actor    | film_id      |
+| film_category | film_id      |
+| film_category | category_id  |
+| film_text     | film_id      |
+| inventory     | inventory_id |
+| language      | language_id  |
+| payment       | payment_id   |
+| rental        | rental_id    |
+| staff         | staff_id     |
+| store         | store_id     |
++---------------+--------------+
+```
+
+![table](https://github.com/kirill-kornienko/DDL-DML/blob/main/2.tables.png)
 
 
 
