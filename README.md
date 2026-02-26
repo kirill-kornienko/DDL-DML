@@ -1,116 +1,42 @@
-# Домашнее задание к занятию «Работа с данными (DDL/DML)» - `Корниенко Кирилл`
+# Домашнее задание к занятию «Репликация и масштабирование. Часть 1» - `Корниенко Кирилл`
 
 
 ### Задание 1. 
-1.1. Поднимите чистый инстанс MySQL версии 8.0+. Можно использовать локальный сервер или контейнер Docker.
-
-1.2. Создайте учётную запись sys_temp.
-
-1.3. Выполните запрос на получение списка пользователей в базе данных. (скриншот)
-
-1.4. Дайте все права для пользователя sys_temp.
-
-1.5. Выполните запрос на получение списка прав для пользователя sys_temp. (скриншот)
-
-1.6. Переподключитесь к базе данных от имени sys_temp.
-
-Для смены типа аутентификации с sha2 используйте запрос:
-
-```
-ALTER USER 'sys_test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
-```
-1.6. По ссылке https://downloads.mysql.com/docs/sakila-db.zip скачайте дамп базы данных.
-
-1.7. Восстановите дамп в базу данных.
-
-1.8. При работе в IDE сформируйте ER-диаграмму получившейся базы данных. При работе в командной строке используйте команду для получения всех таблиц базы данных. (скриншот)
-
-*Результатом работы должны быть скриншоты обозначенных заданий, а также простыня со всеми запросами.
+На лекции рассматривались режимы репликации master-slave, master-master, опишите их различия.
+*Ответить в свободной форме.*
 
 ### *Ответ:*
 
-1.1. Поднимите чистый инстанс MySQL версии 8.0+. Можно использовать локальный сервер или контейнер Docker.
+Главное различие между Master-Slave и Master-Master заключается в том, кому разрешено изменять данные и как система обрабатывает конфликты.
+### Режим Master-Slave (Ведущий-Ведомый)
+В этой архитектуре один сервер назначается главным (Master), а остальные — подчиненными (Slaves).
 
-```
-wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.28-1_all.deb
-sudo dpkg -i mysql-apt-config_0.8.28-1_all.deb
-sudo apt update
-sudo apt install mysql-server
-sudo systemctl status mysql
-sudo systemctl enable mysql
-mysql -u root -p
-```
-![status_mysql](https://github.com/kirill-kornienko/DDL-DML/blob/main/status%20mysql.png)
-![mysql](https://github.com/kirill-kornienko/DDL-DML/blob/main/mysql.png)
+### Запись (Write): 
+Только Master может принимать запросы на запись (INSERT, UPDATE, DELETE). Все изменения данных происходят исключительно на нем.
 
-1.2. Создайте учётную запись sys_temp.
-```
-CREATE USER 'sys_temp'@'localhost' IDENTIFIED BY '1234567';
-```
-![create_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/create%20user.png)
+### Чтение (Read): 
+Чтение данных можно распределять между Master и/или Slaves. Обычно всю нагрузку по чтению отдают Slaves, чтобы разгрузить Master для операций записи.
 
-1.3. Выполните запрос на получение списка пользователей в базе данных. (скриншот)
+### Поток данных: 
+Master записывает все изменения в специальный бинарный лог (журнал). Каждый Slave подключается к Masterу, читает этот лог и применяет те же изменения к себе, оставаясь точной копией.
+Из плюсов можно выделить отсутствие конфликтов, легкую масштабируемость чтения (добавив еще один Slave сервер), создание ркезервной копии без остановки Master сервера
+Из минусов - единая точка отказа, если Master сервер выходит из строя то запись данных в базу становится невозможна.
 
-```
-SELECT user FROM mysql.user;
+### Режим Master-Master (Ведущий-Ведущий / Мульти-мастер)
+В этой архитектуре два или более серверов являются равноправными.
 
-```
+### Запись (Write): 
+Любой из Master-серверов может принимать запросы на запись. Клиент может писать на любой узел.
 
-![select_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/select%20user.png)
+### Чтение (Read): 
+Как и в первом случае, чтение можно делать с любого узла.
 
-1.4. Дайте все права для пользователя sys_temp.
+### Поток данных: 
+Каждый Master реплицирует свои изменения на другой Master (или все остальные). Все серверы одновременно выступают и в роли Masterа (для клиентов) и в роли Slave (друг для друга).
 
-```
-GRANT ALL PRIVILEGES ON *.* TO 'sys_temp'@'localhost' WITH GRANT OPTION;
-```
-![all_priveleges](https://github.com/kirill-kornienko/DDL-DML/blob/main/all_priveleges.png)
+Из плюсов можно выделить отказоустойчивость
+Из минусов - возможные конфликты данных
 
-1.5. Выполните запрос на получение списка прав для пользователя sys_temp. (скриншот)
-
-```
-SELECT * FROM information_schema.user_privileges WHERE GRANTEE="'sys_temp'@'localhost'";
-```
-![systemp1](https://github.com/kirill-kornienko/DDL-DML/blob/main/sys_temp1.png)
-![systemp2](https://github.com/kirill-kornienko/DDL-DML/blob/main/sys_temp2.png)
-
-1.6. Переподключитесь к базе данных от имени sys_temp.
-
-```bash
-SYSTEM mysql -u sys_temp -p
-SELECT user();
-```
-![select_user](https://github.com/kirill-kornienko/DDL-DML/blob/main/user%20sys_temp.png)
-
-Для смены типа аутентификации с sha2 используйте запрос:
-
-```
-ALTER USER 'sys_test'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
-```
-1.7. По ссылке [https://downloads.mysql.com/docs/sakila-db.zip](https://downloads.mysql.com/docs/sakila-db.zip) скачайте дамп базы данных.
-
-```
-wget https://downloads.mysql.com/docs/sakila-db.zip
-unzip sakila-db.zip
-```
-![sakila](https://github.com/kirill-kornienko/DDL-DML/blob/main/sakila.png)
-
-1.8. Восстановите дамп в базу данных.
-
-```
-source /home/tverdyakov/sakila-db/sakila-schema.sql
-source /home/tverdyakov/sakila-db/sakila-data.sql
-SHOW DATABASES;
-```
-![sakila_schema](https://github.com/kirill-kornienko/DDL-DML/blob/main/sakila_schema1.png)
-![sakila_data](https://github.com/kirill-kornienko/DDL-DML/blob/main/sakila_data.png)
-![show_databases](https://github.com/kirill-kornienko/DDL-DML/blob/main/show_database.png)
-
-1.9. При работе в IDE сформируйте ER-диаграмму получившейся базы данных. При работе в командной строке используйте команду для получения всех таблиц базы данных. (скриншот)
-
-```
-SHOW TABLES;
-```
-![show_tables](https://github.com/kirill-kornienko/DDL-DML/blob/main/show_tables.png)
 
 ### Задание 2. 
 
