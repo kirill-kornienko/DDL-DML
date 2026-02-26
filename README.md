@@ -165,4 +165,433 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-``` 
+```
+
+3. Создаем SQL скрипты для инициализации
+   
+   Скрипты для шардов
+
+   ```bash
+   nano conf/shard1/init.sql
+   ```
+
+   ```sql
+  -- Создаем таблицу пользователей на шарде
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGINT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    country VARCHAR(50),
+    registration_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Создаем таблицу книг (вертикальный шард)
+CREATE TABLE IF NOT EXISTS books (
+    book_id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    isbn VARCHAR(20),
+    price DECIMAL(10, 2),
+    category_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Создаем таблицу магазинов (вертикальный шард)
+CREATE TABLE IF NOT EXISTS shops (
+    shop_id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address TEXT,
+    phone VARCHAR(20),
+    country VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Добавляем ограничение CHECK для горизонтального шардинга users
+-- Шард 1: user_id % 3 = 0
+ALTER TABLE users ADD CONSTRAINT users_shard_check 
+    CHECK (user_id % 3 = 0);
+
+-- Индексы для ускорения
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_country ON users(country);
+CREATE INDEX idx_books_category ON books(category_id);
+CREATE INDEX idx_shops_country ON shops(country);
+
+-- Вставляем тестовые данные для демонстрации
+-- Пользователи (только те, что подходят для этого шарда)
+INSERT INTO users (user_id, name, email, country) VALUES
+    (3, 'Пользователь 3', 'user3@mail.com', 'Россия'),
+    (6, 'Пользователь 6', 'user6@mail.com', 'США'),
+    (9, 'Пользователь 9', 'user9@mail.com', 'Германия')
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Книги (одинаковые на всех шардах - вертикальный шардинг)
+INSERT INTO books (title, author, price, category_id) VALUES
+    ('Война и мир', 'Лев Толстой', 500.00, 1),
+    ('Преступление и наказание', 'Федор Достоевский', 450.00, 1),
+    ('1984', 'Джордж Оруэлл', 400.00, 2)
+ON CONFLICT (book_id) DO NOTHING;
+
+-- Магазины (одинаковые на всех шардах - вертикальный шардинг)
+INSERT INTO shops (name, address, country) VALUES
+    ('Читай-город', 'ул. Ленина, 10', 'Россия'),
+    ('Книжный Лабиринт', 'пр. Мира, 25', 'Россия'),
+    ('Book Depository', 'Baker Street, 221', 'Великобритания')
+ON CONFLICT (shop_id) DO NOTHING;
+```
+
+```bash
+nano conf/shard1/init.sql
+```
+
+```sql
+-- Создаем таблицу пользователей на шарде
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGINT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    country VARCHAR(50),
+    registration_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Создаем таблицу книг (вертикальный шард)
+CREATE TABLE IF NOT EXISTS books (
+    book_id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    isbn VARCHAR(20),
+    price DECIMAL(10, 2),
+    category_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Создаем таблицу магазинов (вертикальный шард)
+CREATE TABLE IF NOT EXISTS shops (
+    shop_id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address TEXT,
+    phone VARCHAR(20),
+    country VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Добавляем ограничение CHECK для горизонтального шардинга users
+-- Шард 2: user_id % 3 = 1
+ALTER TABLE users ADD CONSTRAINT users_shard_check 
+    CHECK (user_id % 3 = 1);
+
+-- Индексы для ускорения
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_country ON users(country);
+CREATE INDEX idx_books_category ON books(category_id);
+CREATE INDEX idx_shops_country ON shops(country);
+
+-- Вставляем тестовые данные для демонстрации
+-- Пользователи (только те, что подходят для этого шарда)
+INSERT INTO users (user_id, name, email, country) VALUES
+    (1, 'Пользователь 1', 'user1@mail.com', 'Россия'),
+    (4, 'Пользователь 4', 'user4@mail.com', 'США'),
+    (7, 'Пользователь 7', 'user7@mail.com', 'Германия')
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Книги (одинаковые на всех шардах - вертикальный шардинг)
+INSERT INTO books (title, author, price, category_id) VALUES
+    ('Война и мир', 'Лев Толстой', 500.00, 1),
+    ('Преступление и наказание', 'Федор Достоевский', 450.00, 1),
+    ('1984', 'Джордж Оруэлл', 400.00, 2)
+ON CONFLICT (book_id) DO NOTHING;
+
+-- Магазины (одинаковые на всех шардах - вертикальный шардинг)
+INSERT INTO shops (name, address, country) VALUES
+    ('Читай-город', 'ул. Ленина, 10', 'Россия'),
+    ('Книжный Лабиринт', 'пр. Мира, 25', 'Россия'),
+    ('Book Depository', 'Baker Street, 221', 'Великобритания')
+ON CONFLICT (shop_id) DO NOTHING;
+```
+
+```bash
+nano conf/shard3/init.sql
+```
+
+```sql
+-- Создаем таблицу пользователей на шарде
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGINT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    country VARCHAR(50),
+    registration_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Создаем таблицу книг (вертикальный шард)
+CREATE TABLE IF NOT EXISTS books (
+    book_id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    isbn VARCHAR(20),
+    price DECIMAL(10, 2),
+    category_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Создаем таблицу магазинов (вертикальный шард)
+CREATE TABLE IF NOT EXISTS shops (
+    shop_id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    address TEXT,
+    phone VARCHAR(20),
+    country VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Добавляем ограничение CHECK для горизонтального шардинга users
+-- Шард 3: user_id % 3 = 2
+ALTER TABLE users ADD CONSTRAINT users_shard_check 
+    CHECK (user_id % 3 = 2);
+
+-- Индексы для ускорения
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_country ON users(country);
+CREATE INDEX idx_books_category ON books(category_id);
+CREATE INDEX idx_shops_country ON shops(country);
+
+-- Вставляем тестовые данные для демонстрации
+-- Пользователи (только те, что подходят для этого шарда)
+INSERT INTO users (user_id, name, email, country) VALUES
+    (2, 'Пользователь 2', 'user2@mail.com', 'Россия'),
+    (5, 'Пользователь 5', 'user5@mail.com', 'США'),
+    (8, 'Пользователь 8', 'user8@mail.com', 'Германия')
+ON CONFLICT (user_id) DO NOTHING;
+
+-- Книги (одинаковые на всех шардах - вертикальный шардинг)
+INSERT INTO books (title, author, price, category_id) VALUES
+    ('Война и мир', 'Лев Толстой', 500.00, 1),
+    ('Преступление и наказание', 'Федор Достоевский', 450.00, 1),
+    ('1984', 'Джордж Оруэлл', 400.00, 2)
+ON CONFLICT (book_id) DO NOTHING;
+
+-- Магазины (одинаковые на всех шардах - вертикальный шардинг)
+INSERT INTO shops (name, address, country) VALUES
+    ('Читай-город', 'ул. Ленина, 10', 'Россия'),
+    ('Книжный Лабиринт', 'пр. Мира, 25', 'Россия'),
+    ('Book Depository', 'Baker Street, 221', 'Великобритания')
+ON CONFLICT (shop_id) DO NOTHING;
+```
+
+Создаем скрипт для мастер сервера
+
+```bash
+nano conf/master/init.sql
+```
+
+```sql
+-- Включаем расширение для внешних данных
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- ============================================
+-- 1. ПОДКЛЮЧЕНИЕ К ШАРДАМ (HORIZONTAL SHARDING для users)
+-- ============================================
+
+-- Сервер для шарда 1 (user_id % 3 = 0)
+CREATE SERVER IF NOT EXISTS shard1_server
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'shard1', port '5432', dbname 'books');
+
+CREATE USER MAPPING IF NOT EXISTS FOR postgres
+    SERVER shard1_server
+    OPTIONS (user 'postgres', password 'postgres');
+
+-- Сервер для шарда 2 (user_id % 3 = 1)
+CREATE SERVER IF NOT EXISTS shard2_server
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'shard2', port '5432', dbname 'books');
+
+CREATE USER MAPPING IF NOT EXISTS FOR postgres
+    SERVER shard2_server
+    OPTIONS (user 'postgres', password 'postgres');
+
+-- Сервер для шарда 3 (user_id % 3 = 2)
+CREATE SERVER IF NOT EXISTS shard3_server
+    FOREIGN DATA WRAPPER postgres_fdw
+    OPTIONS (host 'shard3', port '5432', dbname 'books');
+
+CREATE USER MAPPING IF NOT EXISTS FOR postgres
+    SERVER shard3_server
+    OPTIONS (user 'postgres', password 'postgres');
+
+-- ============================================
+-- 2. СОЗДАНИЕ ВНЕШНИХ ТАБЛИЦ (FOREIGN TABLES)
+-- ============================================
+
+-- Внешняя таблица для users с шарда 1
+CREATE FOREIGN TABLE IF NOT EXISTS users_shard1 (
+    user_id BIGINT,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    country VARCHAR(50),
+    registration_date DATE,
+    created_at TIMESTAMP
+) SERVER shard1_server
+OPTIONS (schema_name 'public', table_name 'users');
+
+-- Внешняя таблица для users с шарда 2
+CREATE FOREIGN TABLE IF NOT EXISTS users_shard2 (
+    user_id BIGINT,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    country VARCHAR(50),
+    registration_date DATE,
+    created_at TIMESTAMP
+) SERVER shard2_server
+OPTIONS (schema_name 'public', table_name 'users');
+
+-- Внешняя таблица для users с шарда 3
+CREATE FOREIGN TABLE IF NOT EXISTS users_shard3 (
+    user_id BIGINT,
+    name VARCHAR(100),
+    email VARCHAR(100),
+    country VARCHAR(50),
+    registration_date DATE,
+    created_at TIMESTAMP
+) SERVER shard3_server
+OPTIONS (schema_name 'public', table_name 'users');
+
+-- ============================================
+-- 3. ВЕРТИКАЛЬНЫЙ ШАРДИНГ (разные таблицы на разных серверах)
+-- ============================================
+
+-- Для простоты используем шард 1 для книг
+CREATE FOREIGN TABLE IF NOT EXISTS books (
+    book_id BIGINT,
+    title VARCHAR(200),
+    author VARCHAR(100),
+    isbn VARCHAR(20),
+    price DECIMAL(10,2),
+    category_id INT,
+    created_at TIMESTAMP
+) SERVER shard1_server
+OPTIONS (schema_name 'public', table_name 'books');
+
+-- Используем шард 2 для магазинов
+CREATE FOREIGN TABLE IF NOT EXISTS shops (
+    shop_id BIGINT,
+    name VARCHAR(100),
+    address TEXT,
+    phone VARCHAR(20),
+    country VARCHAR(50),
+    created_at TIMESTAMP
+) SERVER shard2_server
+OPTIONS (schema_name 'public', table_name 'shops');
+
+-- ============================================
+-- 4. СОЗДАНИЕ ПРЕДСТАВЛЕНИЙ (VIEWS) ДЛЯ ЕДИНОЙ ТОЧКИ ДОСТУПА
+-- ============================================
+
+-- Общее представление для пользователей (объединяет все шарды)
+CREATE VIEW users AS
+    SELECT * FROM users_shard1
+    UNION ALL
+    SELECT * FROM users_shard2
+    UNION ALL
+    SELECT * FROM users_shard3;
+
+-- ============================================
+-- 5. ПРАВИЛА ДЛЯ АВТОМАТИЧЕСКОЙ МАРШРУТИЗАЦИИ INSERT
+-- ============================================
+
+-- Функция для определения шарда по user_id
+CREATE OR REPLACE FUNCTION get_shard_for_user(user_id BIGINT)
+RETURNS TEXT AS $$
+BEGIN
+    CASE user_id % 3
+        WHEN 0 THEN RETURN 'shard1';
+        WHEN 1 THEN RETURN 'shard2';
+        WHEN 2 THEN RETURN 'shard3';
+    END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Правило для INSERT в users (горизонтальный шардинг)
+CREATE OR REPLACE RULE users_insert AS ON INSERT TO users
+DO INSTEAD (
+    CASE (NEW.user_id % 3)
+        WHEN 0 THEN INSERT INTO users_shard1 VALUES (NEW.*);
+        WHEN 1 THEN INSERT INTO users_shard2 VALUES (NEW.*);
+        WHEN 2 THEN INSERT INTO users_shard3 VALUES (NEW.*);
+    END CASE
+);
+
+-- Правило для UPDATE в users
+CREATE OR REPLACE RULE users_update AS ON UPDATE TO users
+DO INSTEAD (
+    CASE (OLD.user_id % 3)
+        WHEN 0 THEN UPDATE users_shard1 SET 
+            name = NEW.name, 
+            email = NEW.email,
+            country = NEW.country,
+            registration_date = NEW.registration_date
+            WHERE user_id = OLD.user_id;
+        WHEN 1 THEN UPDATE users_shard2 SET 
+            name = NEW.name, 
+            email = NEW.email,
+            country = NEW.country,
+            registration_date = NEW.registration_date
+            WHERE user_id = OLD.user_id;
+        WHEN 2 THEN UPDATE users_shard3 SET 
+            name = NEW.name, 
+            email = NEW.email,
+            country = NEW.country,
+            registration_date = NEW.registration_date
+            WHERE user_id = OLD.user_id;
+    END CASE
+);
+
+-- Правило для DELETE в users
+CREATE OR REPLACE RULE users_delete AS ON DELETE TO users
+DO INSTEAD (
+    CASE (OLD.user_id % 3)
+        WHEN 0 THEN DELETE FROM users_shard1 WHERE user_id = OLD.user_id;
+        WHEN 1 THEN DELETE FROM users_shard2 WHERE user_id = OLD.user_id;
+        WHEN 2 THEN DELETE FROM users_shard3 WHERE user_id = OLD.user_id;
+    END CASE
+);
+
+-- ============================================
+-- 6. ТЕСТОВЫЕ ДАННЫЕ
+-- ============================================
+
+-- Вставка пользователей через мастер (автоматически распределятся по шардам)
+INSERT INTO users (user_id, name, email, country) VALUES
+    (1, 'Иван Петров', 'ivan@mail.com', 'Россия'),
+    (2, 'Мария Смирнова', 'maria@mail.com', 'Россия'),
+    (3, 'John Smith', 'john@email.com', 'США'),
+    (4, 'Anna Schmidt', 'anna@email.com', 'Германия'),
+    (5, 'Pierre Dubois', 'pierre@email.com', 'Франция'),
+    (6, 'Carlos Garcia', 'carlos@email.com', 'Испания')
+ON CONFLICT DO NOTHING;
+
+-- Проверка распределения
+SELECT 'Users in shard1 (user_id % 3 = 0):' as info;
+SELECT * FROM users_shard1;
+
+SELECT 'Users in shard2 (user_id % 3 = 1):' as info;
+SELECT * FROM users_shard2;
+
+SELECT 'Users in shard3 (user_id % 3 = 2):' as info;
+SELECT * FROM users_shard3;
+```
+
+4. Запуск систем
+
+```bash
+docker compose up -d
+
+# Проверка статуса
+docker compose ps
+```
+
+![docker_ps]
+   
