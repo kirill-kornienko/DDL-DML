@@ -169,7 +169,7 @@ services:
 
 3. Создаем SQL скрипты для инициализации
    
-   Скрипты для шардов
+Скрипты для шардов
 
 ```bash
    nano conf/shard1/init.sql
@@ -243,7 +243,7 @@ ON CONFLICT (shop_id) DO NOTHING;
 ```
 
 ```bash
-nano conf/shard1/init.sql
+nano conf/shard2/init.sql
 ```
 
 ```sql
