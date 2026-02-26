@@ -171,11 +171,11 @@ services:
    
    Скрипты для шардов
 
-   ```bash
+```bash
    nano conf/shard1/init.sql
-   ```
+```
 
-   ```sql
+```sql
   -- Создаем таблицу пользователей на шарде
 CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY,
@@ -239,6 +239,7 @@ INSERT INTO shops (name, address, country) VALUES
     ('Книжный Лабиринт', 'пр. Мира, 25', 'Россия'),
     ('Book Depository', 'Baker Street, 221', 'Великобритания')
 ON CONFLICT (shop_id) DO NOTHING;
+
 ```
 
 ```bash
