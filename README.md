@@ -36,6 +36,48 @@
 
 3. UnrealIRCd 3.2.8.1 - [Backdoor Command Execution (Metasploit)](https://www.exploit-db.com/exploits/16922)
 
+### Задание 2
 
+Проведите сканирование Metasploitable в режимах SYN, FIN, Xmas, UDP.
+
+Запишите сеансы сканирования в Wireshark.
+
+Ответьте на следующие вопросы:
+
+- Чем отличаются эти режимы сканирования с точки зрения сетевого трафика?
+
+- Как отвечает сервер?
+
+*Приведите ответ в свободной форме.*
+
+### Ответ:
+
+#### Режим SYN
+
+Отправляется пакет с флагом SYN для установки соединения. Ответ SYN/ACK - порт открыт (После происходит сброс соединения RST). Ответ RST/ACK - порт закрыт. 
+
+![nmap_sS](https://github.com/kirill-kornienko/Security/blob/main/nmap_sS.png)
+
+![wireahark_sS](https://github.com/kirill-kornienko/Security/blob/main/wireshark_syn.png)
+
+#### Режим FIN
+
+Отправляется пакет с флагом FIN. Ответ RST/ACK - порт закрыт. Если ответа нет - порт открыт|фильтруется.
+
+![nmap_sF](https://github.com/kirill-kornienko/Security/blob/main/nmap_sF.png)
+
+![wireshark_sF](https://github.com/kirill-kornienko/Security/blob/main/wireshark_fin.png)
+
+#### Режим Xmas
+
+Отправляется пакет с флагами FIN/PSH/URG. Ответ RST/ACK - порт закрыт. Если ответа нет - порт открыт|фильтруется.
+
+![nmap_sX](https://github.com/kirill-kornienko/Security/blob/main/nmap_sX.png)
+
+![wireshark_sX](https://github.com/kirill-kornienko/Security/blob/main/wireshark_xmas.png)
+
+#### Режим UDP
+
+Отправляет пустой UDP заголовок на каждый порт. Ответ ICMP ошибка о недостижимости порта (тип 3, код 3) - порт закрыт. Другие ICMP ошибки недостижимости - порт фильтруется. После нескольких попыток без ответа - порт открыт|фильтруется. Ответ UDP - порт открыт.
 
 
