@@ -38,6 +38,4 @@
 
 
 
-В данном примере используется опция --incremental-base=history:last_backup, которая извлекает LSN последней успешной полной или частичной резервной копии (не TTS) из mysql.backup_history таблицы и на этой основе выполняет инкрементную резервную копию.
 
-[Ссылка на документацию MySQL](https://dev.mysql.com/doc/mysql-enterprise-backup/8.2/en/mysqlbackup.incremental.html#meb-incremental-considerations)
