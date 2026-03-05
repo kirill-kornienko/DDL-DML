@@ -4,7 +4,7 @@
 ### Задание 1. 
 
 ### Кейс
-Скачайте и установите виртуальную машину Metasploitable: [[Metasploitable](https://sourceforge.net/projects/metasploitable/)](https://sourceforge.net/projects/metasploitable/)
+Скачайте и установите виртуальную машину Metasploitable: [https://sourceforge.net/projects/metasploitable/](https://sourceforge.net/projects/metasploitable/)
 
 Это типовая ОС для экспериментов в области информационной безопасности, с которой следует начать при анализе уязвимостей.
 
