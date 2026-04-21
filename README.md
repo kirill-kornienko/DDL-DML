@@ -1,61 +1,16 @@
-# Домашнее задание к занятию «Защита хоста» - `Корниенко Кирилл`
+# Для получения доступа к дипломной работе ответьте, пожалуйста, на несколько вопросов.
 
 
-### Задание 1. 
+### 1. Получилось ли у вас загрузить в личный кабинет документы, подтверждающие личность, и диплом о высшем или среднем специальном образовании? 
 
-1. Установите eCryptfs.
-2. Добавьте пользователя cryptouser.
-3. Зашифруйте домашний каталог пользователя с помощью eCryptfs.
+а) Да
 
-*В качестве ответа пришлите снимки экрана домашнего каталога пользователя с исходными и зашифрованными данными.*
+![diplom](https://github.com/kirill-kornienko/Final/blob/main/Diplom.png)
 
-### Ответ:
+### 2. Нужна ли вам справка об обучении после сдачи дипломной работы? Справка выдаётся всем студентам, в том числе тем, у кого нет диплома о высшем или среднем специальном образовании.
 
-1. Добавьте пользователя cryptouser.
+б)  Нет 
 
-![adduser](https://github.com/kirill-kornienko/Host/blob/main/sudo%20adduser%20cryptouser.png)
+### 3. Выполнен ли вами необходимый минимум заданий на каждом модуле профессии для допуска к дипломной работе?
 
-3. Зашифруйте домашний каталог пользователя с помощью eCryptfs.
-
-![ecryptfs](https://github.com/kirill-kornienko/Host/blob/main/sudo%20ecryptfs.png)
-
-![toush](https://github.com/kirill-kornienko/Host/blob/main/touch.png)
-
-![private](https://github.com/kirill-kornienko/Host/blob/main/private.png)
-
-
-
-### Задание 2
-
-1. Установите поддержку LUKS.
-
-2. Создайте небольшой раздел, например, 100 Мб.
-
-3. Зашифруйте созданный раздел с помощью LUKS.
-
-
-*В качестве ответа пришлите снимки экрана с поэтапным выполнением задания.*
-
-### Ответ:
-
-1. Установите поддержку LUKS.
-
-![luks](https://github.com/kirill-kornienko/Host/blob/main/luks.png)
-
-2. Создайте небольшой раздел, например, 100 Мб.
-
-![lsblk](https://github.com/kirill-kornienko/Host/blob/main/lsblk.png)
-
-3. Зашифруйте созданный раздел с помощью LUKS.
-
-![mkfs](https://github.com/kirill-kornienko/Host/blob/main/mkfs.png)
-
-![secret](https://github.com/kirill-kornienko/Host/blob/main/secret.png)
-
-![bad](https://github.com/kirill-kornienko/Host/blob/main/bad%20option.png)
-
-![test](https://github.com/kirill-kornienko/Host/blob/main/test_txt.png)
-
-
-
-
+а) Да
